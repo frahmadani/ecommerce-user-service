@@ -1,7 +1,6 @@
 const UserService = require('../services/user-service');
 const UserAuth = require('./middlewares/auth');
-const logger = require('./utils/app-logger');
-
+const logger = require('../utils/app-logger');
 
 module.exports = async (app, userSvc) => {
     

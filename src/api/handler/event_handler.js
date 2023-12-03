@@ -1,6 +1,6 @@
 const kafkaConsumer = require('../../utils/kafka/kafka_consumer');
 const User = require('../../services/user-service');
-const logger = require('../../utils/app-logger')
+const logger = require('../../utils/app-logger');
 
 const addToCart = async (userService) => {
     let user;
