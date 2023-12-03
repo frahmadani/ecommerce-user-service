@@ -1,4 +1,3 @@
-const database = require('../../../product/src/database');
 const { UserRepository } = require('../database');
 const { formattedData, generatePassword, generateSalt, generateSignature, validatePassword  } = require('../utils');
 const { APIError, BadRequestError } = require('../utils/app-errors');
