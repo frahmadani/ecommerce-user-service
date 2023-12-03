@@ -31,7 +31,9 @@ const UserSchema = new Schema({
         {
             _id: { type: String, require: true },
             amount: { type: String },
-            date: { type: Date, default: Date.now() }
+            date: { type: Date, default: Date.now() },
+            status: { type: String },
+            transactionId: { type: String }
         }
     ]
 }, {

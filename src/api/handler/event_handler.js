@@ -40,7 +40,7 @@ const addToCart = async (userService) => {
                         console.log(ctx, err, 'Data not commit Kafka');
                     }
                     logger.info(`${ctx} - Data committed to Kafka`);
-                    console.log(ctx, data, 'Data Commit Kafka');
+                      console.log(ctx, data, 'Data Commit Kafka');
                 });
             }
         } catch (error) {
@@ -76,8 +76,13 @@ const removeFromCart = async (userService) => {
 
             const userId = parsedMessage?.data?.userId
             const product = parsedMessage?.data?.product
+            const orderId = parsedMessage?.data?.orderId
+            const status = parsedMessage?.data?.status
 
-            const result = await user.RemoveFromCart(userId, product?._id);
+            const result = Promise.all[
+                user.RemoveFromCart(userId, product?._id),
+                user.UpdateOrder(userId, orderId, status)
+            ]
 
             if (result?.err) {
                 logger.error(`${ctx} - Data not committed to Kafka`);
@@ -90,7 +95,7 @@ const removeFromCart = async (userService) => {
                     }
                     logger.info(`${ctx} - Data committed to Kafka`);
 
-                    console.log(ctx, data, 'Data Commit Kafka');
+                      console.log(ctx, data, 'Data Commit Kafka');
                 });
             }
         } catch (error) {
@@ -125,6 +130,9 @@ const moveToOrder = async (userService) => {
             console.log("payload:", payload)
             let data = payload?.data?.data;
             console.log("data:", data)
+            if (data?.transactionId) {
+                data.order.transactionId = data.transactionId
+            }
 
             const result = await userSvc.CreateOrder(data.userId, data.order);
 
@@ -138,15 +146,58 @@ const moveToOrder = async (userService) => {
                         logger.error(`${ctx} - Data not committed to Kafka`);
                     }
                       console.log(ctx, data, 'Data Commit Kafka');
-                      logger.info(`${ctx} - Data committed to Kafka`);
-
                 });
             }
         } catch (error) {
               console.log(ctx, error, 'Data error');
-              logger.error(`${ctx} - Data not committed to Kafka`);
         }
     });
+};
+
+const cancelTxOrder = async (userService) => {
+
+    let userSvc;
+    if (userService) {
+        userSvc = userService
+    } else {
+        userSvc = new User()
+    }
+
+    const dataConsumer = {
+        topic: 'ecommerce-service-cancel-transaction',
+        groupId: 'ecommerce-user-service'
+    };
+
+    const consumer = new kafkaConsumer(dataConsumer);
+    let ctx = 'cancelTxOrder';
+    consumer.on('message', async (message) => {
+        try {
+
+            console.log('Data diterima: ', message);
+
+            const parsedMessage = JSON.parse(message.value);
+            const { userId, transactionId } = parsedMessage?.payload?.data || {}
+
+            const result = await userSvc.CancelTxOrder(userId, transactionId)
+
+            console.log('userid: ', userId);
+
+            if (result?.err || !transactionId) {
+                console.log(ctx, result.err, 'Data not commit Kafka');
+            } else {
+                consumer.commit(true, async (err, data) => {
+                    if (err) {
+                        console.log(ctx, err, 'Data not commit Kafka');
+                    }
+                      console.log(ctx, data, 'Data Commit Kafka');
+                });
+            }
+        } catch (error) {
+              console.log(ctx, error, 'Data error');
+        }
+    });
+
+
 };
 
 
@@ -156,4 +207,5 @@ module.exports = {
     addToCart,
     removeFromCart,
     moveToOrder,
+    cancelTxOrder,
 };

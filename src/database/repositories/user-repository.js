@@ -190,6 +190,7 @@ class UserRepository {
                 if (!user.cart) {
                     user.cart = []
                 }
+                order.status = "unpaid"
 
                 user.orders.push(order);
                 for (const orderItem of order.items) {
@@ -203,12 +204,39 @@ class UserRepository {
                 return userWithUpdatedOrder;
             }
 
-            throw new Error('Unable to create order');
+            throw new APIError("Create Order", 404, 'No user found');
 
         } catch (err) {
+            console.log(err)
             throw new APIError('API Error', 500, 'Unable to create order');
         }
 
+    }
+
+    async UpdateOrder(userId, orderId, newStatus) {
+        console.log("orderId:", orderId)
+        console.log("newStatus:", newStatus)
+        try {
+            const user = await UserModel.findById(userId);
+            if (user) {
+                for (let order of user.orders) {
+                    console.log("order._id:", order._id)
+                    if (order._id === orderId) {
+                        order.status = newStatus
+                        break
+                    }
+                }
+                const userWithUpdatedOrder = await user.save();
+                return userWithUpdatedOrder;
+            }
+
+            throw new APIError("Update Order", 404, 'No user found');
+
+        } catch(e) {
+            console.log(err)
+            throw new APIError("Update Order", 500, "Unable to update order status")
+
+        }
     }
 }
 
