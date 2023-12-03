@@ -19,7 +19,7 @@ module.exports = async (app, userSvc) => {
 
             if (existingUser) {
                 logger.error('Failed registering user: user already exist')
-                return res.status(400).json({message: 'User already exist'});
+                return res.status(400).json({status: 'error', message: 'User already exist'});
             }
 
             const { data } = await this.userSvc.signUp({ email, password });
@@ -29,7 +29,7 @@ module.exports = async (app, userSvc) => {
             return res.json(data);            
         } catch (error) {
             logger.error(`Failed signing up user: ${error}`)
-            return res.status(500).json({error: error, message: 'Failed to signup'});
+            return res.status(500).json({status: 'error', message: 'Failed to signup'});
         }
     });
 
@@ -40,10 +40,10 @@ module.exports = async (app, userSvc) => {
             const { data } = await this.userSvc.signIn({ email, password });
 
             logger.info('Success signing in user');
-            return res.json(data);
+            return res.status(200).json({status: 'success', message: 'Success signing in user', data: data });
         } catch (error) {
             logger.error(`Failed signing in user: ${error}`)
-            next(error);
+            return res.status(500).json({status: 'error', message: 'Failed logging in user' });
         }
     });
 
@@ -54,10 +54,10 @@ module.exports = async (app, userSvc) => {
             const { data } = await this.userSvc.getProfile({ _id });
     
             logger.info('Success retrieving user profile')
-            return res.json(data);
+            return res.status(200).json(data);
         } catch (error) {
             logger.error(`Failed getting user profile: ${error}`)
-            next(error);
+            return res.status(500).json({status: 'error', message: 'Failed retrieving user profile' });
         }
     });
 
