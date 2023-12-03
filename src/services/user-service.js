@@ -4,8 +4,12 @@ const { APIError, BadRequestError } = require('../utils/app-errors');
 
 class UserService {
 
-    constructor() {
-        this.repository = new UserRepository();
+    constructor(userRepo) {
+        if (userRepo) {
+            this.repository = userRepo;
+        } else {
+            this.repository = new UserRepository();
+        }
     }
 
     async signIn(userInputs) {
@@ -138,13 +142,26 @@ class UserService {
     async ManageOrder(userId, order) {
         console.log('========= Entering ManageOrder =======');
         try {
-            const orderResult = await this.repository.CreateOrderForUser(userId, order);
+            const orderResult = await this.repository.CreateOrder(userId, order);
 
             console.log('Finish managing order');
             return formattedData(orderResult);
         } catch (err) {
             throw new APIError('Data not found');
         }
+    }
+
+    async CreateOrder(userId, order) {
+        let result = {}
+        try {
+            await this.repository.CreateOrder(userId, order)
+        } catch (e) {
+            console.log(e)
+            result.err = e
+            throw new APIError('Move To Order', 500, e)
+        }
+        return result
+        
     }
 
 

@@ -9,7 +9,6 @@ const LogErrors = createLogger({
 });
 
 class ErrorLogger {
-    constructor() {}
 
     async logError(err) {
         console.log('=== Start Error Logger ===');
@@ -38,7 +37,7 @@ const ErrorHandler = async (err, req, res, next) => {
 
     process.on('uncaughtException', (reason, promise) => {
         console.log(reason, 'UNHANDLED');
-        throw reason;
+        return res.status(500).json({ "message": reason});
     });
 
     process.on('uncaughtException', (error) => {

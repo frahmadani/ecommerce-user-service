@@ -71,7 +71,7 @@ class UserRepository {
                     let isExist = false;
 
                     // Checking if item already exist in wishlist
-                    wishlist.map(item => {
+                    wishlist.forEach(item => {
                         if (item._id.toString() === product._id.toString()) {
                             const index = wishlist.indexOf(item);
                             wishlist.splice(index, 1);
@@ -119,7 +119,7 @@ class UserRepository {
 
                 if (cartItems.length > 0) {
                     let isExist = false;
-                    cartItems.map(item => {
+                    cartItems.forEach(item => {
                         if (item.product._id.toString() === product._id.toString()) {
                             // If user action is removing from cart
                             if (isRemoving) {
@@ -162,19 +162,8 @@ class UserRepository {
             const user = await UserModel.findById(userId);
 
             if (user) {
-                let cartItems = user.cart;
-
-                if (cartItems.length > 0) {
-
-                    cartItems.map(item => {
-                        if (item.product._id.toString() === productId.toString()) {
-
-                            cartItems.splice(cartItems.indexOf(item), 1);
-
-                        }
-                    });
-                }
-
+                console.log(`product Id to remove ${productId}`)
+                let cartItems = user.cart.filter(item => item.product._id !== productId)
                 user.cart = cartItems;
 
                 const userWithUpdatedCart = await user.save();
@@ -182,28 +171,32 @@ class UserRepository {
                 return userWithUpdatedCart.cart;
 
             }
-            throw new Error('Unable to add item to cart');
+            throw new APIError("User not found", 404, 'Unable to add item to cart');
             
         } catch (error) {
+            console.log(error)
             throw new APIError('API Error', 500, 'Unable to add item to cart');
         }
     }
 
-    async CreateOrderForUser(userId, order) {
-        
+    async CreateOrder(userId, order) {
         try {
-            
             const user = await UserModel.findById(userId);
-
             if (user) {
 
                 if (user.orders == undefined) {
                     user.orders = [];
                 } 
+                if (!user.cart) {
+                    user.cart = []
+                }
 
                 user.orders.push(order);
-
-                user.cart = [];
+                for (const orderItem of order.items) {
+                    user.cart = user.cart.filter(cartItem => {
+                        return cartItem?.product?._id !== orderItem?.product?._id
+                    })
+                }
 
                 const userWithUpdatedOrder = await user.save();
 
