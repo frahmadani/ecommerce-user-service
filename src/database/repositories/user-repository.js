@@ -190,7 +190,7 @@ class UserRepository {
                 if (!user.cart) {
                     user.cart = []
                 }
-                order.status = "unpaid"
+                order.status = "waiting_for_payment"
 
                 user.orders.push(order);
                 for (const orderItem of order.items) {

@@ -203,9 +203,59 @@ const cancelTxOrder = async (userService) => {
 
 
 
+mconst payTxOrder = async (userService) => {
+
+    let userSvc;
+    if (userService) {
+        userSvc = userService
+    } else {
+        userSvc = new User()
+    }
+
+    const dataConsumer = {
+        topic: 'ecommerce-service-pay-transaction',
+        groupId: 'ecommerce-user-service'
+    };
+
+    const consumer = new kafkaConsumer(dataConsumer);
+    let ctx = 'payTxOrder';
+    consumer.on('message', async (message) => {
+        try {
+
+            console.log('Data diterima: ', message);
+
+            const parsedMessage = JSON.parse(message.value);
+            const { userId, transactionId } = parsedMessage?.payload?.data || {}
+
+            const result = await userSvc.PayTxOrder(userId, transactionId)
+
+            console.log('userid: ', userId);
+
+            if (result?.err || !transactionId) {
+                console.log(ctx, result.err, 'Data not commit Kafka');
+            } else {
+                consumer.commit(true, async (err, data) => {
+                    if (err) {
+                        console.log(ctx, err, 'Data not commit Kafka');
+                    }
+                      console.log(ctx, data, 'Data Commit Kafka');
+                });
+            }
+        } catch (error) {
+              console.log(ctx, error, 'Data error');
+        }
+    });
+
+
+};
+
+
+
+
 module.exports = {
     addToCart,
     removeFromCart,
     moveToOrder,
     cancelTxOrder,
+    payTxOrder,
 };

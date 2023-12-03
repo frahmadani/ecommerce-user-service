@@ -152,47 +152,61 @@ class UserService {
     }
 
     async CreateOrder(userId, order) {
-        let result = {}
+        let result = {};
         try {
-            await this.repository.CreateOrder(userId, order)
+            await this.repository.CreateOrder(userId, order);
         } catch (e) {
-            console.log(e)
-            result.err = e
-            throw new APIError('Move To Order', 500, e)
+            console.log(e);
+            result.err = e;
+            throw new APIError('Move To Order', 500, e);
         }
-        return result
+        return result;
         
     }
 
     async UpdateOrder(userId, orderId, newStatus) {
-        let result = {}
+        let result = {};
         try {
-            await this.repository.UpdateOrder(userId, orderId, newStatus)
+            await this.repository.UpdateOrder(userId, orderId, newStatus);
         } catch(e) {
-            console.log(e)
-            result.err = e
-            throw new APIError("Update order", 500, e)
+            console.log(e);
+            result.err = e;
+            throw new APIError('Update order', 500, e);
         }
         return result;
     }
 
-    async CancelTxOrder(userId, txId) {
-        try {
-            const user = await this.repository.FindUserById({id: userId})
-            if (!user) {
-                throw new APIError("Cancel Tx Order", 400, "not found")
-            }
-            for (let order of user.orders) {
-                if (order.transactionId === txId) {
-                    order.status = "canceled"
+    async cancelOrPaidTxOrder(status) {
+        let repo = this.repository;
+        return async(userId, txId) => {
+            let result = {};
+            try {
+                const user = await repo.FindUserById({id: userId});
+                if (!user) throw new APIError('TxOrder {status} fail', 400, 'Not found');
+                for (let order of user.orders) {
+                    if (order.transactionId === txId) {
+                        order.status = status;
+                    }
                 }
+                user.save();
+                return user;
+            } catch(e) {
+                console.log(e);
+                result.err = e;
             }
-            user.save()
-            return user
-        } catch(e) {
-            console.log(e)
-            return { err: e }
-        }
+
+            return result;
+        };
+    }
+
+    async CancelTxOrder(userId, txId) {
+        let f = await this.cancelOrPaidTxOrder('canceled');
+        return await f(userId, txId);
+    }
+
+    async PayTxOrder(userId, txId) {
+        let f = await this.cancelOrPaidTxOrder('paid');
+        return await f(userId, txId);
     }
 
 
