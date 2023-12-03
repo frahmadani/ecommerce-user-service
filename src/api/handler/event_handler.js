@@ -1,5 +1,6 @@
 const kafkaConsumer = require('../../utils/kafka/kafka_consumer');
 const User = require('../../services/user-service');
+const logger = require('../../utils/app-logger')
 
 const addToCart = async (userService) => {
     let user;
@@ -20,6 +21,8 @@ const addToCart = async (userService) => {
         try {
 
             console.log('Data diterima: ', message);
+            logger.info(`${ctx} - Data received by User service - Add To Cart Event`);
+
 
             const parsedMessage = JSON.parse(message.value);
 
@@ -28,17 +31,21 @@ const addToCart = async (userService) => {
             const result = await user.ManageCart(userId, product, qty, isRemoving);
 
             if (result?.err) {
+                logger.error(`${ctx} - Data not committed to Kafka`);
                 console.log(ctx, result.err, 'Data not commit Kafka');
             } else {
                 consumer.commit(true, async (err, data) => {
                     if (err) {
+                        logger.error(`${ctx} - Data not committed to Kafka`);
                         console.log(ctx, err, 'Data not commit Kafka');
                     }
-                      console.log(ctx, data, 'Data Commit Kafka');
+                    logger.info(`${ctx} - Data committed to Kafka`);
+                    console.log(ctx, data, 'Data Commit Kafka');
                 });
             }
         } catch (error) {
               console.log(ctx, error, 'Data error');
+              logger.error(`${ctx} - Data not committed to Kafka`);
         }
     });
 
@@ -63,6 +70,7 @@ const removeFromCart = async (userService) => {
         try {
 
             console.log('Data diterima: ', message);
+            logger.info(`${ctx} - Data received by User service - Remove From Cart Event`);
 
             const parsedMessage = JSON.parse(message.value);
 
@@ -72,17 +80,22 @@ const removeFromCart = async (userService) => {
             const result = await user.RemoveFromCart(userId, product?._id);
 
             if (result?.err) {
+                logger.error(`${ctx} - Data not committed to Kafka`);
                 console.log(ctx, result.err, 'Data not commit Kafka');
             } else {
                 consumer.commit(true, async (err, data) => {
                     if (err) {
+                        logger.error(`${ctx} - Data not committed to Kafka`);
                         console.log(ctx, err, 'Data not commit Kafka');
                     }
-                      console.log(ctx, data, 'Data Commit Kafka');
+                    logger.info(`${ctx} - Data committed to Kafka`);
+
+                    console.log(ctx, data, 'Data Commit Kafka');
                 });
             }
         } catch (error) {
               console.log(ctx, error, 'Data error');
+              logger.error(`${ctx} - Data not committed to Kafka`);
         }
     });
 };
@@ -106,6 +119,7 @@ const moveToOrder = async (userService) => {
         try {
 
             console.log('Data diterima: ', message);
+            logger.info(`${ctx} - Data received by User service - Remove From Cart Event`);
 
             let { payload } = JSON.parse(message.value);
             console.log("payload:", payload)
@@ -116,16 +130,21 @@ const moveToOrder = async (userService) => {
 
             if (result?.err) {
                 console.log(ctx, result.err, 'Data not commit Kafka');
+                logger.error(`${ctx} - Data not committed to Kafka`);
             } else {
                 consumer.commit(true, async (err, data) => {
                     if (err) {
                         console.log(ctx, err, 'Data not commit Kafka');
+                        logger.error(`${ctx} - Data not committed to Kafka`);
                     }
                       console.log(ctx, data, 'Data Commit Kafka');
+                      logger.info(`${ctx} - Data committed to Kafka`);
+
                 });
             }
         } catch (error) {
               console.log(ctx, error, 'Data error');
+              logger.error(`${ctx} - Data not committed to Kafka`);
         }
     });
 };
