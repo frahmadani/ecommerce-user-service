@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const { createLogger, transports } = require('winston');
 const { AppError } = require('./app-errors');
 
@@ -35,7 +36,7 @@ const ErrorHandler = async (err, req, res, next) => {
 
     const errorLogger = new ErrorLogger();
 
-    process.on('uncaughtException', (reason, promise) => {
+    process.on('uncaughtException', (reason) => {
         console.log(reason, 'UNHANDLED');
         return res.status(500).json({ status: 'error', 'message': reason});
     });

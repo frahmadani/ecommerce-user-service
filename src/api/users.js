@@ -10,7 +10,7 @@ module.exports = async (app, userSvc) => {
         this.userSvc = new UserService();
     }
 
-    app.post('/user/signup', async (req, res, next) => {
+    app.post('/user/signup', async (req, res) => {
         logger.info('API /user/signup is called');
         try {
             const { email, password } = req.body;

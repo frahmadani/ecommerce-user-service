@@ -1,6 +1,6 @@
 const { UserRepository } = require('../database');
 const { formattedData, generatePassword, generateSalt, generateSignature, validatePassword  } = require('../utils');
-const { APIError, BadRequestError } = require('../utils/app-errors');
+const { APIError } = require('../utils/app-errors');
 
 class UserService {
 

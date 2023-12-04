@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const expect = require('chai').expect;
 const express = require('express');
 const expressApp = require('../express-app');
