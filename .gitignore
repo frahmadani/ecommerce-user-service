@@ -2,3 +2,4 @@ logs/
 node_modules/
 *audit.json
 *.log
+.nyc_output

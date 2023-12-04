@@ -29,9 +29,10 @@ class UserService {
                     const token = await generateSignature({ email: existingUser.email, _id: existingUser._id});
                     return formattedData({ id: existingUser._id, token });
                 }
+                return formattedData({ code: 403, err: 'invalid password' });
             }
 
-            return formattedData(null);
+            return formattedData({ code: 404, err: `User ${email} not found`});
             
         } catch (err) {
 
@@ -61,6 +62,7 @@ class UserService {
             return formattedData({ id: registeredUser._id, token });
 
         } catch (err) {
+            console.log(err);
             throw new APIError('Failed signup user');
         }
     }
@@ -209,32 +211,6 @@ class UserService {
         return await f(userId, txId);
     }
 
-
-    // SubscribeEvents tidak dipakai lagi. Lgsg call ke service dari event_handler
-    async SubscribeEvents(topic, value) {
-
-        const parsedPayload = JSON.parse(value);
-
-        const { userId, product, order, qty } = parsedPayload.data;
-
-        switch(topic){
-        case 'ADD_TO_CART':
-            console.log('Menerima event ADD_TO_CART');
-            this.ManageCart(userId, product, qty, false);
-            break;
-        case 'REMOVE_FROM_CART':
-            console.log('Menerima event REMOVE_FROM_CART');
-            this.ManageCart(userId, product, qty, true);
-            break;
-        case 'CREATE_ORDER':
-            console.log('Menerima event CREATE_ORDER');
-            this.ManageOrder(userId, order);
-            break;
-        default:
-            break;
-        }
-
-    }
 }
 
 module.exports = UserService;
