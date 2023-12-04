@@ -37,7 +37,7 @@ const ErrorHandler = async (err, req, res, next) => {
 
     process.on('uncaughtException', (reason, promise) => {
         console.log(reason, 'UNHANDLED');
-        return res.status(500).json({ "message": reason});
+        return res.status(500).json({ status: 'error', 'message': reason});
     });
 
     process.on('uncaughtException', (error) => {
@@ -57,12 +57,12 @@ const ErrorHandler = async (err, req, res, next) => {
                 const errorDescription = err.errorStack;
                 return res.status(err.statusCode).json({ 'message': errorDescription });
             }
-            return res.status(err.statusCode).json({ 'message': err.message });
+            return res.status(err.statusCode).json({ status: 'error', 'message': err.message });
         } else {
             // process need exit
         }
 
-        return res.status(err.statusCode).json({ 'message': err.message });
+        return res.status(err.statusCode).json({ status: 'error', 'message': err.message });
     }
 
     next();

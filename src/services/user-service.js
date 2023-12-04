@@ -182,7 +182,7 @@ class UserService {
             let result = {};
             try {
                 const user = await repo.FindUserById({id: userId});
-                if (!user) throw new APIError('TxOrder {status} fail', 400, 'Not found');
+                if (!user) throw new APIError(`TxOrder ${status} fail`, 400, 'Not found');
                 for (let order of user.orders) {
                     if (order.transactionId === txId) {
                         order.status = status;

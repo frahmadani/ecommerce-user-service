@@ -223,7 +223,7 @@ const payTxOrder = async (userService) => {
             console.log('Data diterima: ', message);
 
             const parsedMessage = JSON.parse(message.value);
-            const { userId, transactionId } = parsedMessage?.payload?.data || {};
+            const { userId, transactionId } = parsedMessage?.data || {};
 
             const result = await userSvc.PayTxOrder(userId, transactionId);
 
